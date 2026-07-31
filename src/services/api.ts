@@ -1,5 +1,5 @@
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbyjx-43wqUNO_EN3QIo2NiC88Qw1UJiliNgXJo8YmR3c7dYJSNK-sgS_P8NKifGCI20cA/exec";
+  "https://script.google.com/macros/s/AKfycbw6LD6FaLvUAdpsCd7jbsKPNRAiyR-H2vzs9dAqpey3JA_hga-zB9Iz1_1hhUgTvWL1KQ/exec";
 
 export async function createPost(
   sender: string,
