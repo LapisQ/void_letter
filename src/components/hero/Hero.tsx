@@ -20,32 +20,24 @@ function Hero() {
         }}
         className="relative z-10 text-center"
       >
-
         <h2 className="mb-6 text-xl tracking-[0.8em] text-[var(--accent)]">
           WHERE LOVE BECOMES
         </h2>
 
-        <h1 className="text-7xl font-bold tracking-[0.35em] text-[var(--text-primary)] md:text-8xl">
+        <h1 className="text-4xl tracking-[0.15em] font-bold text-[var(--text-primary)] sm:text-6xl sm:tracking-[0.25em] md:text-8xl md:tracking-[0.35em]">
           VOID LETTERS
         </h1>
 
         <p className="mx-auto mt-10 max-w-3xl text-lg leading-9 text-[var(--text-secondary)]">
 
-          Some stories end.
-
-          Others become literature.
-
-          Leave your words,
-
-          read forgotten confessions,
-
-          and discover letters from every corner of the world.
+          When love knocks on your door, do not open it immediately. 
+          Because some kids likes to ring the bell and run away what remains are merely "Void Letters".
 
         </p>
 
         <button className="mt-14 rounded-full border border-yellow-400 px-10 py-4 text-lg bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border)] transition duration-300 hover:bg-yellow-300 hover:text-black">
 
-          Begin Reading
+          Lapis Q.
 
         </button>
 

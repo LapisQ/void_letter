@@ -22,9 +22,9 @@ function About() {
           transition={{ delay: 0.2, duration: 0.8 }}
           className="mx-auto mt-10 max-w-3xl text-xl leading-10 text-[var(--text-secondary)]"
         >
-          Void Letters is a place where thoughts survive.
-          Write a confession, share a memory, ask a question,
-          or leave behind words that deserve to outlive the moment.
+          Void Letters is a place where Contraduction can be found in its stable state.
+          On Aug 01, 2026: I wish every young girl a very happy - Girlfriend Day.
+
         </motion.p>
 
       </div>
