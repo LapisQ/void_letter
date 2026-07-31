@@ -12,7 +12,7 @@ function About() {
           transition={{ duration: 0.8 }}
           className="text-5xl font-bold text-[var(--text-primary)]"
         >
-          What is Void Letters?
+          WHO AM I
         </motion.h2>
 
         <motion.p
@@ -22,10 +22,28 @@ function About() {
           transition={{ delay: 0.2, duration: 0.8 }}
           className="mx-auto mt-10 max-w-3xl text-xl leading-10 text-[var(--text-secondary)]"
         >
-          Void Letters is a place where Contraduction can be found in its stable state.
-          On Aug 01, 2026: I wish every young girl a very happy - Girlfriend Day.
+          The one who had everything yet lost in life, Tried everything when nothing was right.
+          I used to love her the most but she was a stranger in the disguise.
 
         </motion.p>
+
+         <section className="space-y-8">
+
+          <div
+            className="
+              rounded-2xl
+              border
+              border-[var(--border)]
+              bg-[var(--surface)]
+              p-4
+            "
+          >
+            <p className="text-center text-[var(--text-secondary)]">
+              
+            </p>
+          </div>
+
+        </section>
 
       </div>
     </section>

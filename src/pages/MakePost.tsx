@@ -4,15 +4,9 @@ import { createPost } from "../services/api";
 function MakePost() {
 
     const [formData, setFormData] = useState({
-  title: "",
-  to: "",
-  from: "",
-  anonymous: false,
-  mood: "Love",
-  country: "India",
-  language: "English",
-  content: "",
-  tags: "",
+      from: "",
+      to: "",
+      content: ""
 });
 
 const [loading, setLoading] = useState(false);
@@ -57,7 +51,7 @@ async function handleSubmit() {
           </p>
 
           <h1 className="text-5xl font-bold text-[var(--text-primary)]">
-            Write a Letter
+            Greet Your Partner
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
@@ -82,26 +76,26 @@ async function handleSubmit() {
 
   <div>
     <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
-      Title
+      Who's Writing 
     </label>
 
     <input
       type="text"
-      value={formData.title}
+      value={formData.from}
       onChange={(e) =>
         setFormData({
           ...formData,
-          title: e.target.value,
+          from: e.target.value,
         })
       }
       className="w-full rounded-xl border border-[var(--border)] bg-transparent px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-      placeholder="Give your letter a title"
+      placeholder="Your Name - Can be anonymous"
     />
   </div>
 
   <div>
     <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
-      To
+      Dedicated To
     </label>
 
     <input
@@ -120,20 +114,20 @@ async function handleSubmit() {
 
   <div>
     <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
-      From
+      I want to say
     </label>
 
     <input
       type="text"
-      value={formData.from}
+      value={formData.content}
       onChange={(e) =>
         setFormData({
           ...formData,
-          from: e.target.value,
+          content: e.target.value,
         })
       }
       className="w-full rounded-xl border border-[var(--border)] bg-transparent px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-      placeholder="Your name"
+      placeholder="Your Message"
     />
   </div>
 
