@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  /* Void Theme */
+  --bg-primary: #090909;
+  --bg-secondary: #121212;
+  --surface: rgba(255, 255, 255, 0.05);
+
+  --text-primary: #ffffff;
+  --text-secondary: #b9b9b9;
+
+  --accent: #d4af37;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="blossom"] {
+  /* Blossom Theme */
+  --bg-primary: #fff9fb;
+  --bg-secondary: #ffeef4;
+  --surface: rgba(255, 255, 255, 0.65);
+
+  --text-primary: #231f20;
+  --text-secondary: #555555;
+
+  --accent: #f472b6;
+  --border: rgba(255, 192, 203, 0.30);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  font-family: Inter, sans-serif;
+
+  background: var(--bg-primary);
+  color: var(--text-primary);
+
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
