@@ -33,6 +33,8 @@ function Navbar() {
             ["Read Posts", "/read-post"],
             ["Write Q", "/write-question"],
             ["Read World", "/read-world"],
+            ["Treasure", "/treasure"],
+            ["Untold", "/untold"],
           ].map(([title, path]) => (
             <NavLink
               key={path}

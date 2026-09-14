@@ -7,6 +7,8 @@ import MakePost from "./pages/MakePost";
 import ReadPost from "./pages/ReadPost";
 import WriteQuestion from "./pages/WriteYS";
 import ReadWorld from "./pages/ReadYS";
+import Treasure from "./pages/Treasure";
+import Untold from "./pages/Untold";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
         <Route path="/read-post" element={<ReadPost />} />
         <Route path="/write-question" element={<WriteQuestion />} />
         <Route path="/read-world" element={<ReadWorld />} />
+        <Route path="/treasure" element={<Treasure />} />
+        <Route path="/untold" element={<Untold />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

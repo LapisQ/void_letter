@@ -1,4 +1,6 @@
-﻿interface Chapter {
+﻿import { useEffect, useState } from "react";
+
+interface Chapter {
   id: string;
   title: string;
   subtitle: string;
@@ -39,6 +41,31 @@ const chapters: Chapter[] = [
 ];
 
 function ReadYS() {
+  const [visibleChapters, setVisibleChapters] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute("data-chapter-id");
+            if (id) {
+              setVisibleChapters((prev) => ({ ...prev, [id]: true }));
+            }
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    chapters.forEach((chapter) => {
+      const element = document.querySelector(`[data-chapter-id="${chapter.id}"]`);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 pb-20">
       <div className="relative overflow-hidden">
@@ -46,54 +73,54 @@ function ReadYS() {
         <div className="pointer-events-none absolute right-0 top-24 h-72 w-72 rounded-full bg-[var(--accent)]/12 blur-3xl" />
         <div className="pointer-events-none absolute left-1/2 top-32 h-52 w-52 -translate-x-1/2 rounded-full bg-white/10 blur-2xl" />
 
-        <section className="mx-auto max-w-6xl px-6 pb-16">
-          <div className="mb-12 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)]/90 p-8 shadow-2xl shadow-[var(--accent)]/20 backdrop-blur-xl sm:p-12">
+        <section className="mx-auto max-w-5xl px-6 pb-16">
+          <div className="mb-12 rounded-[3rem] border border-[var(--border)] bg-[var(--surface)]/90 p-10 shadow-2xl shadow-[var(--accent)]/20 backdrop-blur-xl">
             <div className="flex flex-col gap-4 text-center">
-              <p className="text-xs uppercase tracking-[0.35em] text-[var(--accent)]">RedaWorld / Short Stories</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-[var(--accent)]">RedaWorld</p>
               <h1 className="font-serif text-5xl font-bold leading-tight tracking-[-0.03em] text-[var(--text-primary)] sm:text-6xl">
-                Stories to keep close
+                A Soft, Romantic World
               </h1>
               <p className="mx-auto max-w-2xl text-base leading-8 text-[var(--text-secondary)]">
-                Small worlds, gathered in one place. Open a story whenever you need a little softness.
+                A book-inspired reading experience with large chapter titles, page-like spacing, and gentle story flow.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-[3rem] border border-[var(--border)] bg-[var(--surface)]/95 p-10 shadow-2xl shadow-[var(--accent)]/15 backdrop-blur-xl">
             {chapters.map((chapter, index) => (
-              <article
+              <section
                 key={chapter.id}
-                className="group flex h-full flex-col rounded-[2rem] border border-[var(--border)] bg-[var(--surface)]/95 p-7 shadow-xl shadow-[var(--accent)]/5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/40 hover:shadow-2xl hover:shadow-[var(--accent)]/10 sm:p-9"
+                data-chapter-id={chapter.id}
+                className={`mx-auto max-w-4xl mb-16 transition-all duration-700 ease-out ${
+                  visibleChapters[chapter.id]
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
               >
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">Story {String(index + 1).padStart(2, "0")}</p>
-                  <span className="text-2xl text-[var(--accent)]/70 transition group-hover:text-[var(--accent)]">↗</span>
-                </div>
-                <div className="mt-10">
-                  <h2 className="font-serif text-4xl font-bold leading-tight tracking-[-0.03em] text-[var(--text-primary)]">
+                <div className="mb-10 text-center">
+                  <p className="text-sm uppercase tracking-[0.35em] text-[var(--accent)]">Chapter {index + 1}</p>
+                  <h2 className="mt-6 font-serif text-7xl font-bold leading-[0.92] tracking-[-0.04em] text-[var(--text-primary)] sm:text-8xl">
                     {chapter.title}
                   </h2>
-                  <p className="mt-4 text-lg italic leading-8 text-[var(--text-secondary)]">
+                  <p className="mx-auto mt-6 max-w-3xl text-lg italic text-[var(--text-secondary)]">
                     {chapter.subtitle}
                   </p>
                 </div>
 
-                <p className="mt-8 flex-1 border-t border-[var(--border)] pt-7 text-base leading-8 text-[var(--text-secondary)]">
-                  {chapter.content[0]}
-                </p>
-
-                <details className="mt-7 border-t border-[var(--border)] pt-5">
-                  <summary className="cursor-pointer list-none text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                    Read story <span className="ml-2 transition group-open:rotate-90">→</span>
-                  </summary>
-                  <div className="mt-6 space-y-5 text-base leading-8 text-[var(--text-secondary)]">
-                    {chapter.content.slice(1).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
-              </article>
+                <div className="space-y-8 text-lg leading-9 text-[var(--text-secondary)]">
+                  {chapter.content.map((paragraph, idx) => (
+                    <p key={idx} className="text-lg first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-serif first-letter:font-bold first-letter:text-[var(--accent)]">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </section>
             ))}
+
+            <div className="mx-auto max-w-4xl rounded-[2rem] border border-[var(--border)] bg-[var(--accent)]/10 p-6 text-[var(--text-secondary)]">
+              <p className="text-sm uppercase tracking-[0.35em] text-[var(--accent)]">End of Pages</p>
+              <p className="mt-3 text-base leading-7">The chapter ends softly, leaving space for the next sentiment to bloom.</p>
+            </div>
           </div>
         </section>
       </div>
