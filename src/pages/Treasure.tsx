@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { verifyPrivatePassword } from "../services/privateAccess";
 
 interface ChatMessage {
   id: number;
@@ -19,7 +20,6 @@ interface MessageGroup {
 
 const messagePattern = /^(?:\[)?(\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:[ap]m\.?)?)\]?\s*(?:-\s+)?([^:]+):\s?(.*)$/i;
 const mediaPattern = /<attached:\s*(.+?)>|(.+?)\s+\(file attached\)/i;
-const treasurePassword = "Lapis@Queen";
 const bundledChatNames = [
   "chat.txt",
   "_chat.txt",
@@ -209,10 +209,10 @@ function Treasure() {
 
   const leftParticipant = messages[0]?.author;
 
-  function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password === treasurePassword) {
+    if (await verifyPrivatePassword(password)) {
       setIsUnlocked(true);
       return;
     }

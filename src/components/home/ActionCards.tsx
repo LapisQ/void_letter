@@ -9,7 +9,7 @@ import ActionCard from "./ActionCard";
 
 function ActionCards() {
   return (
-    <section className="bg-black py-32 px-6">
+    <section className="bg-[var(--bg-primary)] px-6 py-32 transition-colors duration-400">
 
       <div className="mx-auto max-w-7xl">
 

@@ -35,7 +35,7 @@ function Navbar() {
           to="/"
           className="shrink-0 text-lg font-bold tracking-[0.24em] text-[var(--text-primary)] sm:text-xl lg:text-2xl lg:tracking-[0.35em]"
         >
-          VOID LETTERS
+          LAPIS QUEEN
         </NavLink>
 
         {/* Navigation */}

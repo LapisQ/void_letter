@@ -33,8 +33,8 @@ function ActionCard({
         h-64
         rounded-3xl
         border
-        border-white/10
-        bg-white/5
+        border-[var(--border)]
+        bg-[var(--surface)]
         backdrop-blur-xl
         p-8
         cursor-pointer
@@ -51,21 +51,21 @@ function ActionCard({
           transition
           duration-500
           bg-gradient-to-br
-          from-yellow-400/10
-          to-purple-500/10
+          from-[var(--accent)]/15
+          to-pink-400/10
           "
         />
 
         <Icon
           size={48}
-          className="text-yellow-300 mb-6"
+          className="mb-6 text-[var(--accent)]"
         />
 
-        <h2 className="text-3xl font-bold text-white">
+        <h2 className="text-3xl font-bold text-[var(--text-primary)]">
           {title}
         </h2>
 
-        <p className="mt-3 text-gray-300">
+        <p className="mt-3 text-[var(--text-secondary)]">
           {subtitle}
         </p>
       </motion.div>

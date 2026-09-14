@@ -2,6 +2,7 @@ import Hero from "../components/hero/Hero";
 import ActionCards from "../components/home/ActionCards";
 import About from "../components/home/About";
 import FeaturedLetters from "../components/home/FeaturedLetters";
+import RelationshipTimeline from "../components/home/RelationshipTimeline";
 import { useLocation } from "react-router-dom";
 
 function Home() {
@@ -17,6 +18,7 @@ function Home() {
   <Hero />
   <About />
   <ActionCards />
+  <RelationshipTimeline />
   <FeaturedLetters />
     </>
   );
