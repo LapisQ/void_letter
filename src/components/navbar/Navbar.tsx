@@ -9,7 +9,6 @@ function Navbar() {
   const links = [
     ["Make Post", "/make-post"],
     ["Read Posts", "/read-post"],
-    ["Write Q", "/write-question"],
     ["Read World", "/read-world"],
     ["Treasure", "/treasure"],
     ["Untold", "/untold"],

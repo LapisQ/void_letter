@@ -12,7 +12,7 @@ function About() {
           transition={{ duration: 0.8 }}
           className="text-5xl font-bold text-[var(--text-primary)]"
         >
-          WHO AM I
+          FOR THE BIRTHDAY GIRL
         </motion.h2>
 
         <motion.p
@@ -22,28 +22,16 @@ function About() {
           transition={{ delay: 0.2, duration: 0.8 }}
           className="mx-auto mt-10 max-w-3xl text-xl leading-10 text-[var(--text-secondary)]"
         >
-          The one who had everything yet lost in life, Tried everything when nothing was right.
-          I used to love her the most but she was a stranger in the disguise.
+          Today is not for ordinary words. It is for celebrating the person who makes ordinary days brighter, conversations warmer, and memories worth keeping.
+          May this next year bring you gentle mornings, unexpected joy, and every beautiful thing you have been quietly hoping for.
 
         </motion.p>
 
-         <section className="space-y-8">
-
-          <div
-            className="
-              rounded-2xl
-              border
-              border-[var(--border)]
-              bg-[var(--surface)]
-              p-4
-            "
-          >
-            <p className="text-center text-[var(--text-secondary)]">
-              
-            </p>
-          </div>
-
-        </section>
+        <div className="mx-auto mt-12 flex max-w-xl items-center justify-center gap-3 text-sm uppercase tracking-[0.25em] text-[var(--accent)]">
+          <span className="h-px flex-1 bg-[var(--border)]" />
+          <span>your day, your year, your story</span>
+          <span className="h-px flex-1 bg-[var(--border)]" />
+        </div>
 
       </div>
     </section>

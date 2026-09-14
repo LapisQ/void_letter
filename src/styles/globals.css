@@ -33,6 +33,14 @@ body,
   min-height: 100%;
 }
 
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;

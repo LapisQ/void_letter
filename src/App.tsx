@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/navbar/Navbar";
+import Footer from "./components/common/Footer";
 
 import Home from "./pages/Home";
 import MakePost from "./pages/MakePost";
@@ -26,6 +27,8 @@ function App() {
         <Route path="/untold" element={<Untold />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      <Footer />
     </>
   );
 }

@@ -1,8 +1,8 @@
 import {
-  BookOpen,
-  Globe2,
-  PenSquare,
-  ScrollText,
+  CakeSlice,
+  Gift,
+  Heart,
+  Sparkles,
 } from "lucide-react";
 
 import ActionCard from "./ActionCard";
@@ -22,30 +22,30 @@ function ActionCards() {
           "
         >
           <ActionCard
-            title="Make Post"
-            subtitle="Write something that deserves to be remembered."
-            icon={PenSquare}
+            title="Birthday Letter"
+            subtitle="Write a wish that deserves to be remembered."
+            icon={CakeSlice}
             link="/make-post"
           />
 
           <ActionCard
-            title="Read Posts"
-            subtitle="Discover anonymous letters from people around the world."
-            icon={BookOpen}
+            title="Birthday Wishes"
+            subtitle="Read the kind words waiting to be found."
+            icon={Heart}
             link="/read-post"
           />
 
           <ActionCard
-            title="Write Your Question"
-            subtitle="Share your thoughts anonymously."
-            icon={ScrollText}
-            link="/write-question"
+            title="Your Treasure"
+            subtitle="Open the private memories saved just for you."
+            icon={Gift}
+            link="/treasure"
           />
 
           <ActionCard
-            title="Read World"
-            subtitle="Explore writings from every country."
-            icon={Globe2}
+            title="A Year of Magic"
+            subtitle="Step into stories, dreams, and new beginnings."
+            icon={Sparkles}
             link="/read-world"
           />
         </div>
