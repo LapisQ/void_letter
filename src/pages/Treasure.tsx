@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import JSZip from "jszip";
 
 interface ChatMessage {
   id: number;
@@ -13,12 +12,6 @@ interface ChatMessage {
   mediaType?: "image" | "video" | "audio" | "file";
 }
 
-interface MediaFile {
-  name: string;
-  url: string;
-  type: ChatMessage["mediaType"];
-}
-
 interface MessageGroup {
   date: string;
   messages: ChatMessage[];
@@ -27,10 +20,11 @@ interface MessageGroup {
 const messagePattern = /^(?:\[)?(\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:[ap]m\.?)?)\]?\s*(?:-\s+)?([^:]+):\s?(.*)$/i;
 const mediaPattern = /<attached:\s*(.+?)>|(.+?)\s+\(file attached\)/i;
 const treasurePassword = "Lapis@Queen";
-
-function getFileName(path: string) {
-  return decodeURIComponent(path.split("/").pop() ?? path).toLowerCase();
-}
+const bundledChatNames = [
+  "chat.txt",
+  "_chat.txt",
+  "WhatsApp Chat with Lapis Q.txt",
+];
 
 function getMediaType(name: string): ChatMessage["mediaType"] {
   const extension = name.split(".").pop()?.toLowerCase();
@@ -39,19 +33,6 @@ function getMediaType(name: string): ChatMessage["mediaType"] {
   if (["mp4", "mov", "webm", "m4v"].includes(extension ?? "")) return "video";
   if (["mp3", "m4a", "ogg", "wav", "opus", "aac"].includes(extension ?? "")) return "audio";
   return "file";
-}
-
-function decodeChatText(data: Uint8Array) {
-  if (data[0] === 0xff && data[1] === 0xfe) {
-    return new TextDecoder("utf-16le").decode(data);
-  }
-
-  if (data[0] === 0xfe && data[1] === 0xff) {
-    return new TextDecoder("utf-16be").decode(data);
-  }
-
-  const text = new TextDecoder("utf-8").decode(data);
-  return text.includes("\u0000") ? new TextDecoder("utf-16le").decode(data) : text;
 }
 
 function getInitials(author: string) {
@@ -63,10 +44,60 @@ function getInitials(author: string) {
     .join("");
 }
 
-function parseChat(text: string, mediaFiles: MediaFile[]) {
+function getBundledMediaUrl(name: string) {
+  return `/treasure/${name.split(/[\\/]/).map(encodeURIComponent).join("/")}`;
+}
+
+function renderEmojiText(text: string, keyPrefix: string): ReactNode[] {
+  const emojiPattern = /(\p{Extended_Pictographic}(?:\uFE0E|\uFE0F)?(?:\u200D\p{Extended_Pictographic}(?:\uFE0E|\uFE0F)?|\p{Emoji_Modifier})*)/gu;
+  const emojiOnlyPattern = /^\p{Extended_Pictographic}(?:\uFE0E|\uFE0F)?(?:\u200D\p{Extended_Pictographic}(?:\uFE0E|\uFE0F)?|\p{Emoji_Modifier})*$/u;
+
+  return text.split(emojiPattern).map((part, index) => (
+    emojiOnlyPattern.test(part)
+      ? <span key={`${keyPrefix}-emoji-${index}`} className="inline-block align-middle text-[1.28em] leading-none">{part}</span>
+      : <span key={`${keyPrefix}-text-${index}`}>{part}</span>
+  ));
+}
+
+function renderMessageText(text: string): ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|```[^`]+```|\*[^*]+\*|_[^_]+_|~[^~]+~)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index} className="font-bold text-[var(--text-primary)]">{renderEmojiText(part.slice(2, -2), `bold-${index}`)}</strong>;
+    }
+
+    if (part.startsWith("```") && part.endsWith("```")) {
+      return <code key={index} className="rounded bg-[var(--bg-secondary)] px-1.5 py-0.5 font-mono text-[0.9em] text-[var(--accent)]">{part.slice(3, -3)}</code>;
+    }
+
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return <em key={index}>{renderEmojiText(part.slice(1, -1), `italic-${index}`)}</em>;
+    }
+
+    if (part.startsWith("_") && part.endsWith("_")) {
+      return <em key={index}>{renderEmojiText(part.slice(1, -1), `underscore-${index}`)}</em>;
+    }
+
+    if (part.startsWith("~") && part.endsWith("~")) {
+      return <del key={index}>{renderEmojiText(part.slice(1, -1), `strike-${index}`)}</del>;
+    }
+
+    return renderEmojiText(part, `plain-${index}`);
+  }).flat();
+}
+
+function normalizeChatText(text: string) {
+  return text
+    .replace(/\uFEFF/g, "")
+    .replace(/\u202F/g, " ")
+    .replace(/â€¯/g, " ");
+}
+
+function parseChat(text: string) {
   const messages: ChatMessage[] = [];
 
-  for (const line of text.replace(/\uFEFF/g, "").split(/\r?\n/)) {
+  for (const line of normalizeChatText(text).split(/\r\n|\n|\r/)) {
     const match = line.match(messagePattern);
 
     if (!match) {
@@ -76,11 +107,7 @@ function parseChat(text: string, mediaFiles: MediaFile[]) {
 
     const [, date, time, author, rawText] = match;
     const mediaMatch = rawText.match(mediaPattern);
-    const mediaName = mediaMatch?.[1] ?? mediaMatch?.[2];
-    const media = mediaName
-      ? mediaFiles.find((file) => getFileName(file.name) === getFileName(mediaName))
-      : undefined;
-
+    const mediaName = (mediaMatch?.[1] ?? mediaMatch?.[2])?.trim().replace(/[.,;]$/, "");
     messages.push({
       id: messages.length,
       date,
@@ -88,12 +115,22 @@ function parseChat(text: string, mediaFiles: MediaFile[]) {
       author: author.trim(),
       text: mediaName ? "" : rawText,
       mediaName,
-      mediaUrl: media?.url,
-      mediaType: media?.type,
     });
   }
 
   return messages;
+}
+
+function parseBundledChat(text: string) {
+  return parseChat(text).map((message) => {
+    if (!message.mediaName) return message;
+
+    return {
+      ...message,
+      mediaUrl: getBundledMediaUrl(message.mediaName),
+      mediaType: getMediaType(message.mediaName),
+    };
+  });
 }
 
 function Treasure() {
@@ -101,14 +138,51 @@ function Treasure() {
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [archiveName, setArchiveName] = useState("");
-  const [chatName, setChatName] = useState("WhatsApp Chat");
+  const [archiveName, setArchiveName] = useState("Bundled treasure folder");
+  const [chatName, setChatName] = useState("Treasure Archive");
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [messageLimit, setMessageLimit] = useState(200);
+  useEffect(() => {
+    if (!isUnlocked) return;
 
-  useEffect(() => () => mediaUrls.forEach((url) => URL.revokeObjectURL(url)), [mediaUrls]);
+    let cancelled = false;
+
+    async function loadBundledTreasure() {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const loadedChat = await Promise.any(
+          bundledChatNames.map(async (name) => {
+            const response = await fetch(`/treasure/${encodeURIComponent(name)}`, { cache: "force-cache" });
+            if (!response.ok) throw new Error(`Could not load ${name}`);
+            const text = await response.text();
+            const parsedMessages = parseBundledChat(text);
+            if (!parsedMessages.length) throw new Error(`${name} is not a readable chat export`);
+            return { name, messages: parsedMessages };
+          })
+        );
+
+        if (!cancelled) {
+          setMessages(loadedChat.messages);
+          setMessageLimit(200);
+          setArchiveName("Bundled treasure folder");
+          setChatName(loadedChat.name.replace(/\.txt$/i, ""));
+        }
+      } catch (loadError) {
+        if (!cancelled) setError("No WhatsApp chat text file was found in public/treasure. Keep the original filename or add chat.txt there.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    void loadBundledTreasure();
+    return () => {
+      cancelled = true;
+    };
+  }, [isUnlocked]);
 
   const visibleMessages = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -116,8 +190,13 @@ function Treasure() {
     return messages.filter((message) => `${message.author} ${message.text} ${message.mediaName ?? ""}`.toLowerCase().includes(query));
   }, [messages, search]);
 
+  const displayedMessages = useMemo(
+    () => visibleMessages.slice(0, messageLimit),
+    [messageLimit, visibleMessages]
+  );
+
   const messageGroups = useMemo<MessageGroup[]>(() => {
-    return visibleMessages.reduce<MessageGroup[]>((groups, message) => {
+    return displayedMessages.reduce<MessageGroup[]>((groups, message) => {
       const currentGroup = groups[groups.length - 1];
       if (currentGroup?.date === message.date) {
         currentGroup.messages.push(message);
@@ -126,7 +205,7 @@ function Treasure() {
       }
       return groups;
     }, []);
-  }, [visibleMessages]);
+  }, [displayedMessages]);
 
   const leftParticipant = messages[0]?.author;
 
@@ -139,44 +218,6 @@ function Treasure() {
     }
 
     navigate("/", { replace: true, state: { accessDenied: true } });
-  }
-
-  async function handleArchive(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsLoading(true);
-    setError("");
-    setMessages([]);
-    setMediaUrls([]);
-
-    try {
-      const archive = await JSZip.loadAsync(file);
-      const entries = Object.values(archive.files).filter((entry) => !entry.dir);
-      const chatEntry = entries
-        .filter((entry) => entry.name.toLowerCase().endsWith(".txt"))
-        .sort((a, b) => Number(!a.name.toLowerCase().includes("chat")) - Number(!b.name.toLowerCase().includes("chat")))[0];
-
-      if (!chatEntry) throw new Error("This archive does not contain a chat text file.");
-
-      const mediaEntries = entries.filter((entry) => entry !== chatEntry);
-      const mediaFiles = await Promise.all(mediaEntries.map(async (entry) => {
-        const blob = await entry.async("blob");
-        const url = URL.createObjectURL(blob);
-        return { name: entry.name, url, type: getMediaType(entry.name) } satisfies MediaFile;
-      }));
-
-      setMediaUrls(mediaFiles.map((media) => media.url));
-      const chatData = await chatEntry.async("uint8array");
-      setMessages(parseChat(decodeChatText(chatData), mediaFiles));
-      setArchiveName(file.name);
-      setChatName(file.name.replace(/\.zip$/i, "").replace(/^WhatsApp Chat - /i, "") || "WhatsApp Chat");
-    } catch (archiveError) {
-      setError(archiveError instanceof Error ? archiveError.message : "We could not read this archive.");
-    } finally {
-      setIsLoading(false);
-      event.target.value = "";
-    }
   }
 
   if (!isUnlocked) {
@@ -221,10 +262,9 @@ function Treasure() {
               <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-4xl">A room for treasured memories</h1>
               <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--text-secondary)]">Open a chat export and revisit its words, images, and little moments in a calm reading space.</p>
             </div>
-            <label className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--bg-primary)] transition hover:opacity-90 sm:w-auto">
-              {isLoading ? "Opening archive..." : "Choose archive"}
-              <input type="file" accept=".zip,application/zip" className="hidden" onChange={handleArchive} disabled={isLoading} />
-            </label>
+            <span className="inline-flex w-full items-center justify-center rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-5 py-3 text-sm font-semibold text-[var(--accent)] sm:w-auto">
+              {isLoading ? "Opening treasure..." : "Treasure folder loaded"}
+            </span>
           </div>
           {error && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</p>}
         </header>
@@ -250,13 +290,13 @@ function Treasure() {
               <div className="flex min-h-[30rem] flex-col items-center justify-center px-5 text-center sm:min-h-[35rem] sm:px-8">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--accent)]/10 text-2xl text-[var(--accent)]">✦</div>
                 <h2 className="mt-6 text-2xl font-semibold">Your conversation belongs here</h2>
-                <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-secondary)]">Choose a chat export with media, then open the ZIP above. Nothing is uploaded or stored by this reader.</p>
+                <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-secondary)]">Place your extracted files in the public/treasure folder and the conversation will appear here automatically.</p>
               </div>
             ) : (
               <div className="space-y-5 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.08),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(212,175,55,0.05),transparent_35%)] p-3 sm:p-8">
                 <div className="mx-auto mb-8 flex w-fit items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs text-[var(--text-secondary)]">
                   <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
-                  {visibleMessages.length} of {messages.length} memories
+                  {displayedMessages.length} of {visibleMessages.length} matching memories
                 </div>
                 {messageGroups.map((group) => (
                   <div key={group.date} className="mx-auto min-w-0 max-w-3xl">
@@ -291,7 +331,7 @@ function Treasure() {
                                   {message.mediaUrl && message.mediaType === "audio" && <audio src={message.mediaUrl} controls className="mt-3 max-w-full" />}
                                   {message.mediaName && !message.mediaUrl && <p className="mt-3 break-words text-sm text-[var(--text-secondary)]">Media not found in this archive: {message.mediaName}</p>}
                                   {message.mediaName && message.mediaUrl && message.mediaType === "file" && <a href={message.mediaUrl} download={message.mediaName} className="mt-3 block break-words text-sm text-[var(--accent)] underline">Download {message.mediaName}</a>}
-                                  {message.text && <p className="mt-3 break-words whitespace-pre-wrap text-[14px] leading-7 text-[var(--text-primary)] [font-family:'Segoe_UI_Emoji','Apple_Color_Emoji','Noto_Color_Emoji',sans-serif] sm:text-[15px]">{message.text}</p>}
+                                  {message.text && <p className="mt-3 break-words whitespace-pre-wrap text-[15px] leading-7 tracking-[0.01em] text-[var(--text-primary)] [font-family:'Segoe_UI','Segoe_UI_Emoji','Apple_Color_Emoji','Noto_Color_Emoji',sans-serif]">{renderMessageText(message.text)}</p>}
                                 </div>
                               </div>
                             </article>
@@ -301,6 +341,15 @@ function Treasure() {
                     </div>
                   </div>
                 ))}
+                {displayedMessages.length < visibleMessages.length && (
+                  <button
+                    type="button"
+                    onClick={() => setMessageLimit((limit) => limit + 200)}
+                    className="mx-auto block rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-5 py-3 text-sm font-semibold text-[var(--accent)] transition hover:bg-[var(--accent)]/20"
+                  >
+                    Load more memories
+                  </button>
+                )}
                 {visibleMessages.length === 0 && <p className="py-16 text-center text-sm text-[var(--text-secondary)]">No memories match your search.</p>}
               </div>
             )}
