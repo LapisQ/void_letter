@@ -48,24 +48,16 @@ function FeaturedLetters() {
     <section className="bg-[var(--bg-primary)] py-28">
       <div className="mx-auto max-w-7xl px-6">
 
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <h2
           className="mb-14 text-center text-5xl font-bold text-[var(--text-primary)]"
         >
           Birthday Notes
-        </motion.h2>
+        </h2>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {letters.map((letter, index) => (
+          {letters.map((letter) => (
             <motion.article
               key={letter.title}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.15 }}
               whileHover={{ y: -8 }}
               className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 backdrop-blur-xl"
             >

@@ -11,6 +11,8 @@
 
   --accent: #d4af37;
   --border: rgba(255, 255, 255, 0.08);
+  --particle-color: #ffffff;
+  --particle-glow: rgba(255, 255, 255, 0.7);
 }
 
 [data-theme="blossom"] {
@@ -24,6 +26,8 @@
 
   --accent: #f472b6;
   --border: rgba(255, 192, 203, 0.30);
+  --particle-color: #231f20;
+  --particle-glow: rgba(35, 31, 32, 0.35);
 }
 
 html,

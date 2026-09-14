@@ -118,10 +118,7 @@ function RelationshipTimeline() {
   return (
     <section className="overflow-hidden bg-[var(--bg-primary)] py-28">
       <div className="mx-auto max-w-7xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <div
           className="mx-auto max-w-3xl text-center"
         >
           <p className="mb-4 text-sm uppercase tracking-[0.35em] text-[var(--accent)]">A story in chapters</p>
@@ -129,13 +126,9 @@ function RelationshipTimeline() {
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
             Eight moments that changed the shape of the story. Choose a checkpoint to open it.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ delay: 0.18, duration: 0.7 }}
+        <div
           className="relative mt-16"
         >
           <div
@@ -207,7 +200,7 @@ function RelationshipTimeline() {
               </form>
             </motion.div>
           )}
-        </motion.div>
+        </div>
 
         {isUnlocked && activeEvent && selectedEvent !== null && (
           <>

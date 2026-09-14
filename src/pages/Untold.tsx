@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { LockKeyhole, Sparkles } from "lucide-react";
+import { FileText, LockKeyhole, MessageCircle, Sparkles } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { verifyPrivatePassword } from "../services/privateAccess";
+import ChatViewer from "../components/common/ChatViewer";
 
 const answers = [
   "Not in a million year.",
@@ -17,18 +18,9 @@ const catDialogues = [
   "That's my master's girl for you!",
 ];
 
-const passwordDialogues = [
-  "Go Ahead enter the code.",
-  "I don't have the whole day.",
-  "I have a job to do myself.",
-  "If you keep me waiting here that means you are not lapis.",
-  "Master is waiting since he was born.",
-  "O God, Those slow humans.",
-];
-
 type MascotMood = "thinking" | "delighted" | "furious" | "very-angry" | "angry" | "little-happy" | "very-happy";
 
-function CatMascot({ mood, hoverMood, dialogue, className = "", roaming = false, screenRoaming = false }: { mood: MascotMood; hoverMood: MascotMood | null; dialogue: string | null; className?: string; roaming?: boolean; screenRoaming?: boolean }) {
+function CatMascot({ mood, hoverMood, dialogue, className = "", roaming = false }: { mood: MascotMood; hoverMood: MascotMood | null; dialogue: string | null; className?: string; roaming?: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   const expression = hoverMood ?? (isHovered ? "very-happy" : mood);
   const isAngry = expression === "furious" || expression === "very-angry" || expression === "angry";
@@ -38,8 +30,8 @@ function CatMascot({ mood, hoverMood, dialogue, className = "", roaming = false,
     <motion.div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      animate={screenRoaming ? { x: [0, "28vw", "28vw", "62vw", "62vw", "34vw", "34vw", 0], y: [0, "16vh", "16vh", "42vh", "42vh", "62vh", "62vh", 0], rotate: [-3, 3, 3, -2, -2, 2, 2, 0] } : roaming ? { x: [-24, 20, -14, 24, 0], y: [0, -12, 6, -8, 0], rotate: [-3, 2, -2, 3, 0] } : isAngry ? { x: expression === "very-angry" ? [-7, 7, -7, 7, 0] : [-4, 4, -4, 0] } : expression === "thinking" ? { rotate: [-3, 3, -3] } : { y: [0, -5, 0] }}
-      transition={{ duration: screenRoaming ? 30 : roaming ? 8 : expression === "very-angry" ? 0.35 : 1.2, repeat: isAngry && !roaming && !screenRoaming ? 0 : Infinity, repeatDelay: 1.5 }}
+      animate={roaming ? { x: [-24, 20, -14, 24, 0], y: [0, -12, 6, -8, 0], rotate: [-3, 2, -2, 3, 0] } : isAngry ? { x: expression === "very-angry" ? [-7, 7, -7, 7, 0] : [-4, 4, -4, 0] } : expression === "thinking" ? { rotate: [-3, 3, -3] } : { y: [0, -5, 0] }}
+      transition={{ duration: roaming ? 8 : expression === "very-angry" ? 0.35 : 1.2, repeat: isAngry && !roaming ? 0 : Infinity, repeatDelay: 1.5 }}
       className={`group relative flex h-32 w-32 shrink-0 cursor-pointer items-end justify-center rounded-[2rem] border-2 border-[var(--accent)]/60 bg-[var(--bg-secondary)] pb-3 shadow-lg shadow-[var(--accent)]/15 ${className}`}
       aria-label="Interactive animated cat guardian"
     >
@@ -76,7 +68,7 @@ function CatMascot({ mood, hoverMood, dialogue, className = "", roaming = false,
 function Untold() {
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [passwordDialogueIndex, setPasswordDialogueIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<"untold" | "chat">("untold");
   const [passwordError, setPasswordError] = useState(false);
   const [mascotMood, setMascotMood] = useState<MascotMood>("thinking");
   const [hoverMood, setHoverMood] = useState<MascotMood | null>(null);
@@ -84,18 +76,6 @@ function Untold() {
   const [wrongAnswer, setWrongAnswer] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
-
-  useEffect(() => {
-    if (isUnlocked) {
-      return;
-    }
-
-    const dialogueTimer = window.setInterval(() => {
-      setPasswordDialogueIndex((currentIndex) => (currentIndex + 1) % passwordDialogues.length);
-    }, 3000);
-
-    return () => window.clearInterval(dialogueTimer);
-  }, [isUnlocked]);
 
   useEffect(() => {
     if (!isEntering) {
@@ -139,7 +119,6 @@ function Untold() {
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-primary)] px-6 pb-10 pt-24 text-[var(--text-primary)]">
         <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-[var(--accent)]/15 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-pink-400/10 blur-3xl" />
-        <CatMascot mood="thinking" hoverMood={null} dialogue={passwordDialogues[passwordDialogueIndex]} screenRoaming className="pointer-events-auto absolute left-6 top-28 z-10 scale-75 sm:left-10 sm:scale-90" />
         <div className="relative z-20 mx-auto w-full max-w-md">
           <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 text-center shadow-2xl shadow-[var(--accent)]/15 backdrop-blur-xl sm:p-10">
           <LockKeyhole className="mx-auto text-[var(--accent)]" size={30} />
@@ -195,19 +174,53 @@ function Untold() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)] px-6 pb-20 pt-32 text-[var(--text-primary)] lg:px-10">
-      <section className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-        <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-[var(--accent)]">Words waiting for a voice</p>
-          <h1 className="mt-6 font-serif text-6xl font-bold leading-tight tracking-[-0.04em] sm:text-8xl">Untold</h1>
-        </div>
-        <div className="border-l border-[var(--accent)]/50 pl-6 sm:pl-10">
-          <p className="max-w-2xl text-2xl leading-relaxed text-[var(--text-primary)] sm:text-4xl">There is a kind of freedom in giving the unspoken somewhere to land.</p>
-          <p className="mt-8 max-w-xl leading-8 text-[var(--text-secondary)]">This is a quiet place for thoughts that never found the right moment, stories that stayed folded away, and feelings that deserve to be named.</p>
-          <div className="mt-12 flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[var(--accent)]"><span className="h-px w-12 bg-[var(--accent)]" />Begin with one honest line</div>
-        </div>
-      </section>
-    </main>
+    <>
+      <nav className="relative z-20 mx-auto mt-20 flex w-fit items-center gap-1 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-lg shadow-[var(--accent)]/10 backdrop-blur-xl lg:mt-28" aria-label="Untold views">
+        <button
+          type="button"
+          onClick={() => setActiveTab("untold")}
+          aria-pressed={activeTab === "untold"}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${activeTab === "untold" ? "bg-[var(--accent)] text-[var(--bg-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--accent)]/10 hover:text-[var(--text-primary)]"}`}
+        >
+          <FileText size={16} />
+          Untold
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("chat")}
+          aria-pressed={activeTab === "chat"}
+          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${activeTab === "chat" ? "bg-[var(--accent)] text-[var(--bg-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--accent)]/10 hover:text-[var(--text-primary)]"}`}
+        >
+          <MessageCircle size={16} />
+          Chat
+        </button>
+      </nav>
+
+      {activeTab === "chat" ? (
+        <ChatViewer
+          folder="untold"
+          archiveLabel="Untold folder"
+          eyebrow="Untold / private archive"
+          title="A room for unspoken memories"
+          description="Read the conversations, voices, and moments kept inside the Untold archive. Everything loads locally in your browser."
+          emptyMessage="Place your extracted chat and media files in public/untold. The conversation will appear here automatically."
+        />
+      ) : (
+        <main className="min-h-screen bg-[var(--bg-primary)] px-6 pb-20 pt-32 text-[var(--text-primary)] lg:px-10">
+          <section className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-[var(--accent)]">Words waiting for a voice</p>
+              <h1 className="mt-6 font-serif text-6xl font-bold leading-tight tracking-[-0.04em] sm:text-8xl">Untold</h1>
+            </div>
+            <div className="border-l border-[var(--accent)]/50 pl-6 sm:pl-10">
+              <p className="max-w-2xl text-2xl leading-relaxed text-[var(--text-primary)] sm:text-4xl">There is a kind of freedom in giving the unspoken somewhere to land.</p>
+              <p className="mt-8 max-w-xl leading-8 text-[var(--text-secondary)]">This is a quiet place for thoughts that never found the right moment, stories that stayed folded away, and feelings that deserve to be named.</p>
+              <div className="mt-12 flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[var(--accent)]"><span className="h-px w-12 bg-[var(--accent)]" />Begin with one honest line</div>
+            </div>
+          </section>
+        </main>
+      )}
+    </>
   );
 }
 

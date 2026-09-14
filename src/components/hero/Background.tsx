@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed) * 10000;
+  return value - Math.floor(value);
+}
+
 function Background() {
   const particles = Array.from({ length: 90 }, (_, index) => ({
-    top: (index * 47) % 100,
-    left: (index * 71) % 100,
-    driftX: ((index * 13) % 36) - 18,
-    driftY: ((index * 19) % 30) - 15,
-    duration: 12 + (index % 8) * 2,
-    delay: (index % 9) * 0.7,
+    top: seededRandom(index * 2 + 1) * 100,
+    left: seededRandom(index * 2 + 2) * 100,
     size: index % 7 === 0 ? 3 : 2,
   }));
 
@@ -61,27 +62,17 @@ function Background() {
       />
 
       {particles.map((particle, index) => (
-        <motion.div
+        <div
           key={index}
-          initial={{ opacity: 0.15, scale: 0.7 }}
-          animate={{
-            x: [0, particle.driftX, particle.driftX * -0.7, 0],
-            y: [0, particle.driftY, particle.driftY * -0.6, 0],
-            opacity: [0.15, 0.85, 0.35, 0.15],
-            scale: [0.7, 1.2, 0.85, 0.7],
-          }}
-          transition={{
-            duration: particle.duration,
-            delay: particle.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+          className="absolute rounded-full"
           style={{
             top: `${particle.top}%`,
             left: `${particle.left}%`,
             width: particle.size,
             height: particle.size,
+            opacity: 0.5,
+            backgroundColor: "var(--particle-color)",
+            boxShadow: "0 0 8px var(--particle-glow)",
           }}
         />
       ))}

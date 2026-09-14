@@ -1,25 +1,15 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { CakeSlice, Gift, Heart, Sparkles } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Background from "./Background";
 import ScrollIndicator from "../home/ScrollIndicator";
 
 function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
   const [wishMade, setWishMade] = useState(false);
   const [mood, setMood] = useState("joy");
   const [surprise, setSurprise] = useState(false);
   const [hearts, setHearts] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const contentScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.88]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.72, 1], [1, 0.92, 0]);
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 90]);
-  const dateRotate = useTransform(scrollYProgress, [0, 1], [0, -8]);
 
   const moodMessages = {
     joy: "Today looks good on you.",
@@ -28,13 +18,13 @@ function Hero() {
   };
 
   return (
-    <section ref={heroRef} className="relative flex min-h-screen w-full items-center justify-center overflow-hidden">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden">
 
       {/* Background Glow */}
 
-      <motion.div style={{ y: backgroundY }} className="absolute inset-0">
+      <div className="absolute inset-0">
         <Background />
-      </motion.div>
+      </div>
 
       {/* Hero Content */}
 
@@ -44,7 +34,6 @@ function Hero() {
         transition={{
           duration: 1.3,
         }}
-        style={{ y: contentY, scale: contentScale, opacity: contentOpacity }}
         className="relative z-10 px-5 text-center"
       >
         <h2 className="mb-6 text-sm font-semibold uppercase tracking-[0.45em] text-[var(--accent)] sm:text-xl sm:tracking-[0.8em]">
@@ -55,9 +44,9 @@ function Hero() {
           HAPPY BIRTHDAY
         </h1>
 
-        <motion.div style={{ rotate: dateRotate }} className="mx-auto mt-5 inline-flex items-center rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/15 px-5 py-2 text-sm font-semibold tracking-[0.18em] text-[var(--accent)] shadow-lg shadow-[var(--accent)]/10 sm:mt-6 sm:text-base">
+        <div className="mx-auto mt-5 inline-flex items-center rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/15 px-5 py-2 text-sm font-semibold tracking-[0.18em] text-[var(--accent)] shadow-lg shadow-[var(--accent)]/10 sm:mt-6 sm:text-base">
           21 SEP 20XX
-        </motion.div>
+        </div>
 
         <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-[var(--text-secondary)] sm:mt-10 sm:text-xl sm:leading-9">
           A small corner of the internet made for your smile, your stories, and all the lovely things that make you, you.
